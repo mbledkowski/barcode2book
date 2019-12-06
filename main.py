@@ -35,15 +35,17 @@ try:
   while True:
     # TODO - save the api response to file for some time, if book was checked before read data from that file
     getinput = input('Barcode scanner\n$ ')
+
     if re.search(r'^\d{13}$', getinput):
       try:
         response = requests.get("https://www.googleapis.com/books/v1/volumes?q=isbn:" + getinput)
       except:
         print("There is problem with internet connection.\nPlz try again later.")
         continue
-      # check what is the https status
+      # check what is the actual https status
       if response.status_code != 200:
         print("Error: "+str(response.status_code))
+
       else:
         getjson = response.json()
         # check if there is only one item
@@ -52,47 +54,49 @@ try:
             print("This item do not exist in Google Books database :(")
           else:
             print("Error: there is more than one book.")
+
         else:
-          booksinfoitems = getjson["items"][0]
+          booksVolInfo = getjson["items"][0]["volumeInfo"]
+          booksAccInfo = getjson["items"][0]["accessInfo"]
 
-          if "title" not in booksinfoitems["volumeInfo"]:
-            booksinfoitems["volumeInfo"]["title"] = "Title not found :/"
+          if "title" not in booksVolInfo:
+            booksVolInfo["title"] = "Title not found :/"
 
-          if "subtitle" in booksinfoitems["volumeInfo"]:
-            printdata("title", [booksinfoitems["volumeInfo"]["title"], booksinfoitems["volumeInfo"]["subtitle"]])
+          if "subtitle" in booksVolInfo:
+            printdata("title", [booksVolInfo["title"], booksVolInfo["subtitle"]])
           else:
-            printdata("title", [booksinfoitems["volumeInfo"]["title"]])
+            printdata("title", [booksVolInfo["title"]])
 
           # check if authors exists
-          if "authors" in booksinfoitems["volumeInfo"]:
-            printdata("authors", booksinfoitems["volumeInfo"]["authors"])
+          if "authors" in booksVolInfo:
+            printdata("authors", booksVolInfo["authors"])
           else:
             printdata("authors", [])
 
           # add element with value "-" if do not exist
-          if "publisher" not in booksinfoitems["volumeInfo"]:
-            booksinfoitems["volumeInfo"]["publisher"] = "-"
-          if "publishedDate" not in booksinfoitems["volumeInfo"]:
-            booksinfoitems["volumeInfo"]["publisher"] = "-"
+          if "publisher" not in booksVolInfo:
+            booksVolInfo["publisher"] = "-"
+          if "publishedDate" not in booksVolInfo:
+            booksVolInfo["publisher"] = "-"
 
-          printdata("publishing", [booksinfoitems["volumeInfo"]["publisher"], booksinfoitems["volumeInfo"]["publishedDate"]])
+          printdata("publishing", [booksVolInfo["publisher"], booksVolInfo["publishedDate"]])
 
 
-          if "pageCount" not in booksinfoitems["volumeInfo"]:
-            booksinfoitems["volumeInfo"]["pageCount"] = "-"
-          if "language" not in booksinfoitems["volumeInfo"]:
-            booksinfoitems["volumeInfo"]["language"] = "-"
-          if "maturityRating" not in booksinfoitems["volumeInfo"]:
-            booksinfoitems["volumeInfo"]["maturityRating"] = "-"
+          if "pageCount" not in booksVolInfo:
+            booksVolInfo["pageCount"] = "-"
+          if "language" not in booksVolInfo:
+            booksVolInfo["language"] = "-"
+          if "maturityRating" not in booksVolInfo:
+            booksVolInfo["maturityRating"] = "-"
           else: #if maturityRating exists remove "_" and make everything lowercase
-            if booksinfoitems["volumeInfo"]["maturityRating"] == "NOT_MATURE":
-              booksinfoitems["volumeInfo"]["maturityRating"] = "not mature"
+            if booksVolInfo["maturityRating"] == "NOT_MATURE":
+              booksVolInfo["maturityRating"] = "not mature"
             else:
-              booksinfoitems["volumeInfo"]["maturityRating"] = booksinfoitems["volumeInfo"]["maturityRating"].lower()
-          if "publicDomain" not in booksinfoitems["accessInfo"]:
-            booksinfoitems["accessInfo"]["publicDomain"] = "-"
+              booksVolInfo["maturityRating"] = booksVolInfo["maturityRating"].lower()
+          if "publicDomain" not in booksAccInfo:
+            booksAccInfo["publicDomain"] = "-"
 
-          printdata("others", [booksinfoitems["volumeInfo"]["pageCount"], booksinfoitems["volumeInfo"]["language"], booksinfoitems["volumeInfo"]["maturityRating"], booksinfoitems["accessInfo"]["publicDomain"]])
+          printdata("others", [booksVolInfo["pageCount"], booksVolInfo["language"], booksVolInfo["maturityRating"], booksAccInfo["publicDomain"]])
     elif getinput == 'exit':
       try:
         sys.exit(0)
