@@ -40,7 +40,7 @@ try:
       try:
         response = requests.get("https://www.googleapis.com/books/v1/volumes?q=isbn:" + getinput)
       except:
-        print("There is problem with internet connection.\nPlz try again later.")
+        print("There is problem with internet connection.\nPlease try again later.")
         continue
       # check what is the actual https status
       if response.status_code != 200:
